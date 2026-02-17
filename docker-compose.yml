@@ -28,6 +28,9 @@ services:
     container_name: transaction_importer_ui
     environment:
       - REACT_APP_API_URL=
+      - UI_HOST_ORIGIN=
+      - DANGEROUSLY_DISABLE_HOST_CHECK=true # Only for dev!
+      - HOST=0.0.0.0 # Only for dev!
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
