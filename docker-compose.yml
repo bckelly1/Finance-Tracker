@@ -23,6 +23,20 @@ services:
     networks:
       - $DEFAULT_NETWORK
 
+  transaction_importer_ui:
+    build: ./ui
+    container_name: transaction_importer_ui
+    environment:
+      - REACT_APP_API_URL=
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=$DEFAULT_NETWORK"
+      - "traefik.http.routers.transaction_importer_ui.rule=Host(`transaction-importer-ui.$MY_DOMAIN`)"
+      - "traefik.http.services.transaction_importer_ui.loadbalancer.server.port=3000"
+    networks:
+      - $DEFAULT_NETWORK
+
 networks:
   traefik_net:
     name: $DEFAULT_NETWORK

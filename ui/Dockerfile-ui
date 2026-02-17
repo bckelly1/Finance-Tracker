@@ -1,0 +1,9 @@
+FROM node
+
+COPY ./ui /usr/src/transactions/
+
+WORKDIR /usr/src/transactions
+
+RUN npm install
+
+CMD ["npm", "start"]
