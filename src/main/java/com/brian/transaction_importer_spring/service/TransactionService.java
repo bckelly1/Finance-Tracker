@@ -7,8 +7,6 @@ import com.brian.transaction_importer_spring.repository.CategoryRepository;
 import com.brian.transaction_importer_spring.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -19,19 +17,15 @@ public class TransactionService {
 
     private final CategoryRepository categoryRepository;
 
-    public List<Transaction> getAllTransactions() {
-        return transactionRepository.findAll();
-    }
-
     public Optional<Transaction> updateTransaction(final Long id, final TransactionDTO transactionDTO) {
-        Category category = categoryRepository.findById(transactionDTO.getCategoryId());
+        Category category = categoryRepository.findByName(transactionDTO.getCategory());
 
         return transactionRepository.findById(id).map(transaction -> {
             transaction.setCategory(category);
             transaction.setAmount(transactionDTO.getAmount());
             transaction.setDescription(transactionDTO.getDescription());
             transaction.setNotes(transactionDTO.getNotes());
-            transaction.setTransactionType(transactionDTO.getTransactionType());
+            transaction.setTransactionType(transactionDTO.getType());
             return transactionRepository.save(transaction);
         });
     }

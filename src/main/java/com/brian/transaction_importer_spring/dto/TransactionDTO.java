@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-
 import java.sql.Timestamp;
 
 @Getter
@@ -16,15 +15,14 @@ import java.sql.Timestamp;
 public class TransactionDTO {
     private Long id;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC")
     private Timestamp date;
     private String description;
     private String originalDescription;
     private Double amount;
-    private String transactionType;
-
-    private long categoryId;
-    private String merchant;
+    private String type;
+    private String category;
+    private String vendor;
     private String accountName;
     private String mailMessageId;
     private String notes;
@@ -33,12 +31,12 @@ public class TransactionDTO {
         this.id = transaction.getId();
         this.amount = transaction.getAmount();
         this.accountName = transaction.getAccount().getName();
-        this.categoryId = transaction.getCategory().getId();
+        this.category = transaction.getCategory().getName();
         this.date = transaction.getDate();
-        this.merchant = transaction.getMerchant().getName();
+        this.vendor = transaction.getMerchant().getName();
         this.description = transaction.getDescription();
         this.originalDescription = transaction.getOriginalDescription();
-        this.transactionType = transaction.getTransactionType();
+        this.type = transaction.getTransactionType();
         this.mailMessageId = transaction.getMailMessageId();
         this.notes = transaction.getNotes();
     }
