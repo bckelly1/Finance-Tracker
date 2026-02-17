@@ -320,20 +320,20 @@
     transform: translateX(2px);
 }
 
-/* Limit description column width */
-/*.data-table th:nth-child(3),*/
-/*.data-table td:nth-child(3) {*/
-/*    max-width: 250px;*/
-/*    overflow: hidden;*/
-/*    text-overflow: ellipsis;*/
-/*    white-space: nowrap;*/
-/*}*/
+ Limit description column width
+.data-table th:nth-child(3),
+.data-table td:nth-child(3) {
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 
-/*!* Limit vendor column width *!*/
-/*.data-table th:nth-child(7),*/
-/*.data-table td:nth-child(7) {*/
-/*    max-width: 150px;*/
-/*    overflow: hidden;*/
-/*    text-overflow: ellipsis;*/
-/*    white-space: nowrap;*/
-/*}*/
+/* Limit vendor column width */
+.data-table th:nth-child(7),
+.data-table td:nth-child(7) {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
