@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import AdvancedSearch from '../components/AdvancedSearch';
+import CreateTransactionModal from '../components/CreateTransactionModal';
 import TransactionModal from '../components/TransactionModal';
 import './Transactions.css';
 
 function Transactions() {
     const [transactions, setTransactions] = useState([]);
     const [selectedTransaction, setSelectedTransaction] = useState(null);
+    const [showCreateModal, setShowCreateModal] = useState(false);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -18,10 +21,22 @@ function Transactions() {
         fetchCategories();
     }, []);
 
-    const fetchTransactions = async () => {
+    const fetchTransactions = async (searchParams = {}) => {
         try {
             setLoading(true);
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/transactions/`);
+
+            // Build query string from search params
+            const queryParams = new URLSearchParams();
+            Object.entries(searchParams).forEach(([key, value]) => {
+                if (value) {
+                    queryParams.append(key, value);
+                }
+            });
+
+            const queryString = queryParams.toString();
+            const url = `${process.env.REACT_APP_API_URL}/api/transactions${queryString ? '?' + queryString : ''}`;
+
+            const response = await fetch(url);
             if (!response.ok) {
                 throw new Error('Failed to fetch transactions');
             }
@@ -43,6 +58,14 @@ function Transactions() {
         }
         const data = await response.json();
         setCategories(Array.isArray(data) ? data : []);
+    };
+
+    const handleSearch = (searchParams) => {
+        fetchTransactions(searchParams);
+    };
+
+    const handleClearSearch = () => {
+        fetchTransactions();
     };
 
     const handleCategoryChange = async (transactionId, newCategory) => {
@@ -209,6 +232,105 @@ function Transactions() {
         }
     };
 
+    const handleCreateTransaction = async (transactionData) => {
+        try {
+            // Convert datetime-local format to your API format
+            const date = new Date(transactionData.date);
+            const formattedDate = date.getFullYear() + '-' +
+                String(date.getMonth() + 1).padStart(2, '0') + '-' +
+                String(date.getDate()).padStart(2, '0') + ' ' +
+                String(date.getHours()).padStart(2, '0') + ':' +
+                String(date.getMinutes()).padStart(2, '0') + ':' +
+                String(date.getSeconds()).padStart(2, '0');
+
+            const dataToSend = {
+                ...transactionData,
+                date: formattedDate
+            };
+
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/transactions/create`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(dataToSend),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to create transaction');
+            }
+
+            const newTransaction = await response.json();
+
+            // Add to local state
+            setTransactions(prev => [newTransaction, ...prev]);
+
+            setShowCreateModal(false);
+
+            // Optional: Show success message
+            alert('Transaction created successfully!');
+        } catch (err) {
+            console.error('Error creating transaction:', err);
+            alert('Failed to create transaction');
+        }
+    };
+
+    const exportToCSV = () => {
+        // Use the filtered and sorted transactions (what user sees)
+        const dataToExport = filteredAndSortedTransactions;
+
+        // Define CSV headers
+        const headers = [
+            'ID',
+            'Date',
+            'Description',
+            'Original Description',
+            'Amount',
+            'Type',
+            'Category',
+            'Vendor',
+            'Account Name',
+            'Mail ID',
+            'Notes'
+        ];
+
+        // Convert transactions to CSV rows
+        const csvRows = [
+            headers.join(','), // Header row
+            ...dataToExport.map(transaction => [
+                transaction.id,
+                `"${transaction.date}"`,
+                `"${(transaction.description || '').replace(/"/g, '""')}"`,
+                `"${(transaction.originalDescription || '').replace(/"/g, '""')}"`,
+                transaction.amount,
+                transaction.type,
+                `"${(transaction.category || '').replace(/"/g, '""')}"`,
+                `"${(transaction.vendor || '').replace(/"/g, '""')}"`,
+                `"${(transaction.accountName || '').replace(/"/g, '""')}"`,
+                `"${(transaction.mailId || '').replace(/"/g, '""')}"`,
+                `"${(transaction.notes || '').replace(/"/g, '""')}"`,
+            ].join(','))
+        ];
+
+        // Create CSV string
+        const csvString = csvRows.join('\n');
+
+        // Create blob and download
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        // Generate filename with current date
+        const fileName = `transactions_${new Date().toISOString().split('T')[0]}.csv`;
+
+        link.setAttribute('href', url);
+        link.setAttribute('download', fileName);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     if (loading) {
         return (
             <div className="page-container">
@@ -225,7 +347,29 @@ function Transactions() {
             <div className="page-header">
                 <h1 className="page-title">Transactions</h1>
                 <p className="page-description">View and manage all your financial transactions</p>
+
+                <div className="header-actions">
+                    <button
+                        className="btn-export"
+                        onClick={exportToCSV}
+                        title="Export to CSV"
+                    >
+                        📥 Export CSV
+                    </button>
+                    <button
+                        className="btn-create"
+                        onClick={() => setShowCreateModal(true)}
+                    >
+                        + New Transaction
+                    </button>
+                </div>
             </div>
+
+            <AdvancedSearch
+                categories={categories}
+                onSearch={handleSearch}
+                onClear={handleClearSearch}
+            />
 
             <div className="transactions-controls">
                 <div className="search-box">
@@ -370,6 +514,14 @@ function Transactions() {
                     onClose={handleCloseModal}
                     onSave={handleSaveTransaction}
                     onDelete={handleDeleteTransaction}
+                />
+            )}
+
+            {showCreateModal && (
+                <CreateTransactionModal
+                    categories={categories}
+                    onClose={() => setShowCreateModal(false)}
+                    onCreate={handleCreateTransaction}
                 />
             )}
         </div>
