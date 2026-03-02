@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdvancedSearch from '../components/AdvancedSearch';
 import CreateTransactionModal from '../components/CreateTransactionModal';
+import ImportTransactionsModal from "../components/ImportTransactionsModal";
 import TransactionModal from '../components/TransactionModal';
 import './Transactions.css';
 
@@ -8,6 +9,7 @@ function Transactions() {
     const [transactions, setTransactions] = useState([]);
     const [selectedTransaction, setSelectedTransaction] = useState(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showImportModal, setShowImportModal] = useState(false);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -42,6 +44,7 @@ function Transactions() {
             }
             const responseText = await response.text();
             const data = JSON.parse(responseText);
+            console.log(data);
             setTransactions(Array.isArray(data) ? data : []);
             setError(null);
         } catch (err) {
@@ -275,6 +278,35 @@ function Transactions() {
         }
     };
 
+    const handleImportTransactions = async (importCsv) => {
+        try {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/transactions/import`, {
+                method: 'POST',
+                body: importCsv,
+            });
+
+            if (!response.ok) {
+                alert('Failed to create transaction');
+                console.log(response)
+                throw new Error('Failed to import transactions');
+            }
+
+            const importResponse = await response.json();
+            console.log(importResponse);
+
+            // Add to local state
+            const newTransactions = Array.isArray(importResponse) ? importResponse : [];
+            setTransactions(prev => [...newTransactions, ...prev]);
+
+            setShowImportModal(false);
+
+            alert('Transactions imported successfully!');
+        } catch (err) {
+            console.error('Error importing transactions:', err);
+            alert('Failed to import transactions');
+        }
+    };
+
     const exportToCSV = () => {
         // Use the filtered and sorted transactions (what user sees)
         const dataToExport = filteredAndSortedTransactions;
@@ -349,6 +381,13 @@ function Transactions() {
                 <p className="page-description">View and manage all your financial transactions</p>
 
                 <div className="header-actions">
+                    <button
+                        className="btn-import"
+                        onClick={() => setShowImportModal(true)}
+                        title="Import CSV"
+                    >
+                        📥 Import CSV
+                    </button>
                     <button
                         className="btn-export"
                         onClick={exportToCSV}
@@ -522,6 +561,13 @@ function Transactions() {
                     categories={categories}
                     onClose={() => setShowCreateModal(false)}
                     onCreate={handleCreateTransaction}
+                />
+            )}
+
+            {showImportModal && (
+                <ImportTransactionsModal
+                    onClose={() => setShowImportModal(false)}
+                    onCreate={handleImportTransactions}
                 />
             )}
         </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './TransactionModal.css'; // Reuse the same CSS
+import './TransactionModal.css';
 
 function CreateTransactionModal({ categories, onClose, onCreate }) {
     const [formData, setFormData] = useState({

@@ -6,9 +6,10 @@ import com.brian.transaction_importer_spring.entity.Category;
 import com.brian.transaction_importer_spring.entity.Transaction;
 import com.brian.transaction_importer_spring.repository.CategoryRepository;
 import com.brian.transaction_importer_spring.repository.TransactionRepository;
+import com.brian.transaction_importer_spring.service.TransactionImporterService;
 import com.brian.transaction_importer_spring.service.TransactionService;
 import lombok.AllArgsConstructor;
-import org.springframework.data.repository.query.Param;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,6 +31,8 @@ import java.util.stream.Collectors;
 public class TransactionApiController {
 
     private TransactionService transactionService;
+
+    private TransactionImporterService transactionImporterService;
 
     private TransactionRepository transactionRepository;
 
@@ -115,6 +118,16 @@ public class TransactionApiController {
             return new TransactionDTO(createdTransaction.get());
         } else {
             throw new NullPointerException("Transaction could not be created");
+        }
+    }
+
+    @PostMapping(value = "/import")
+    public ResponseEntity<List<TransactionDTO>> importTransactions(@RequestBody String content) {
+        try {
+            List<TransactionDTO> transactions = transactionImporterService.importTransactions(content);
+            return ResponseEntity.ok(transactions);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 }

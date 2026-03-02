@@ -346,6 +346,7 @@
     align-items: center;
 }
 
+.btn-import,
 .btn-export {
     padding: 0.875rem 1.5rem;
     background: var(--color-surface);
@@ -360,6 +361,7 @@
     white-space: nowrap;
 }
 
+.btn-import,
 .btn-export:hover {
     background: var(--color-bg);
     border-color: var(--color-accent);
@@ -368,6 +370,7 @@
     box-shadow: var(--shadow-md);
 }
 
+.btn-import,
 .btn-export:active {
     transform: translateY(0);
 }
