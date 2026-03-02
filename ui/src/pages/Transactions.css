@@ -361,7 +361,7 @@
     white-space: nowrap;
 }
 
-.btn-import,
+.btn-import:hover,
 .btn-export:hover {
     background: var(--color-bg);
     border-color: var(--color-accent);
@@ -370,7 +370,7 @@
     box-shadow: var(--shadow-md);
 }
 
-.btn-import,
+.btn-import:active,
 .btn-export:active {
     transform: translateY(0);
 }
