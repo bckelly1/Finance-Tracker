@@ -1,7 +1,7 @@
 services:
   transaction_importer:
-    #image: transaction_importer_spring
-    build: .
+    image: transaction_importer_spring
+    #build: .
     container_name: transaction_importer_spring
     environment:
       #- SPRING_DATASOURCE_URL=jdbc://
@@ -12,6 +12,7 @@ services:
       #- MAIL_LABEL=
       #- SERVER_PORT=8080
       - EXAMPLE=
+      - UI_HOST_ORIGIN=$UI_HOST_ORIGIN
     restart: unless-stopped
     ports:
       - 8180:8080
@@ -24,11 +25,11 @@ services:
       - $DEFAULT_NETWORK
 
   transaction_importer_ui:
-    build: ./ui
+    #build: ./ui
+    image: transaction_importer_ui
     container_name: transaction_importer_ui
     environment:
-      - REACT_APP_API_URL=
-      - UI_HOST_ORIGIN=
+      - REACT_APP_API_URL=$REACT_APP_API_URL
       - DANGEROUSLY_DISABLE_HOST_CHECK=true # Only for dev!
       - HOST=0.0.0.0 # Only for dev!
     restart: unless-stopped
