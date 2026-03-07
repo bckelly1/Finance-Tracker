@@ -130,4 +130,14 @@ public class TransactionApiController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @GetMapping(value = "/mail/import")
+    public ResponseEntity<List<TransactionDTO>> importMailTransactions() {
+        try {
+            List<TransactionDTO> transactions = transactionImporterService.importMailTransactions();
+            return ResponseEntity.ok(transactions);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

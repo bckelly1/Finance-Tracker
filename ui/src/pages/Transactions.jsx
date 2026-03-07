@@ -4,12 +4,14 @@ import CreateTransactionModal from '../components/CreateTransactionModal';
 import ImportTransactionsModal from "../components/ImportTransactionsModal";
 import TransactionModal from '../components/TransactionModal';
 import './Transactions.css';
+import ImportMailTransactionsModal from "../components/ImportMailTransactionsModal";
 
 function Transactions() {
     const [transactions, setTransactions] = useState([]);
     const [selectedTransaction, setSelectedTransaction] = useState(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showImportModal, setShowImportModal] = useState(false);
+    const [showImportFromMailModal, setShowImportFromMailModal] = useState(false);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -307,6 +309,34 @@ function Transactions() {
         }
     };
 
+    const handleImportMailTransactions = async () => {
+        try {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/transactions/mail/import`, {
+                method: 'GET'
+            });
+
+            if (!response.ok) {
+                alert('Failed to import mail transactions');
+                console.log(response)
+                throw new Error('Failed to import mail transactions');
+            }
+
+            const importResponse = await response.json();
+            console.log(importResponse);
+
+            // Add to local state
+            const newTransactions = Array.isArray(importResponse) ? importResponse : [];
+            setTransactions(prev => [...newTransactions, ...prev]);
+
+            setShowImportModal(false);
+
+            alert('Transactions imported from mail successfully!');
+        } catch (err) {
+            console.error('Error importing mail transactions:', err);
+            alert('Failed to import mail transactions');
+        }
+    };
+
     const exportToCSV = () => {
         // Use the filtered and sorted transactions (what user sees)
         const dataToExport = filteredAndSortedTransactions;
@@ -381,6 +411,13 @@ function Transactions() {
                 <p className="page-description">View and manage all your financial transactions</p>
 
                 <div className="header-actions">
+                    <button
+                        className="btn-import"
+                        onClick={() => setShowImportFromMailModal(true)}
+                        title="Import From Mail"
+                    >
+                        📥 Import From Mail
+                    </button>
                     <button
                         className="btn-import"
                         onClick={() => setShowImportModal(true)}
@@ -568,6 +605,13 @@ function Transactions() {
                 <ImportTransactionsModal
                     onClose={() => setShowImportModal(false)}
                     onCreate={handleImportTransactions}
+                />
+            )}
+
+            {showImportFromMailModal && (
+                <ImportMailTransactionsModal
+                    onClose={() => setShowImportFromMailModal(false)}
+                    onCreate={handleImportMailTransactions}
                 />
             )}
         </div>

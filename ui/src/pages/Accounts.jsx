@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import ImportAccountBalancesModal from "../components/ImportMailBalancesModal";
 
 function Accounts() {
     const [accounts, setAccounts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [showImportBalancesModal, setShowImportBalancesModal] = useState(false);
 
     useEffect(() => {
         fetchAccounts();
@@ -26,6 +28,30 @@ function Accounts() {
         }
     };
 
+    const handleImportAccountBalances = async () => {
+        try {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/accounts/balances/import`, {
+                method: 'GET'
+            });
+
+            if (!response.ok) {
+                alert('Failed to import account balances');
+                console.log(response)
+                throw new Error('Failed to import account balances');
+            }
+
+            const importResponse = await response.json();
+            console.log(importResponse);
+
+            setShowImportBalancesModal(false);
+
+            alert('Balances imported from mail successfully!');
+        } catch (err) {
+            console.error('Error importing account balances:', err);
+            alert('Failed to import account balances');
+        }
+    };
+
     if (loading) {
         return (
             <div className="page-container">
@@ -42,6 +68,16 @@ function Accounts() {
             <div className="page-header">
                 <h1 className="page-title">Accounts</h1>
                 <p className="page-description">Manage your financial accounts</p>
+
+                <div className="header-actions">
+                    <button
+                        className="btn-import"
+                        onClick={() => setShowImportBalancesModal(true)}
+                        title="Import From Mail"
+                    >
+                        📥 Import From Mail
+                    </button>
+                </div>
             </div>
 
             <div className="table-container">
@@ -72,6 +108,12 @@ function Accounts() {
                     </table>
                 </div>
             </div>
+            {showImportBalancesModal && (
+                <ImportAccountBalancesModal
+                    onClose={() => setShowImportBalancesModal(false)}
+                    onCreate={handleImportAccountBalances}
+                />
+            )}
         </div>
     );
 }

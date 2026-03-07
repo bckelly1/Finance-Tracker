@@ -5,6 +5,7 @@ import com.brian.transaction_importer_spring.entity.Account;
 import com.brian.transaction_importer_spring.entity.Institution;
 import com.brian.transaction_importer_spring.repository.AccountRepository;
 import com.brian.transaction_importer_spring.repository.InstitutionRepository;
+import com.brian.transaction_importer_spring.service.ImportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +20,8 @@ public class AccountApiController {
     private final AccountRepository accountRepository;
 
     private final InstitutionRepository institutionRepository;
+
+    private final ImportService importService;
 
     @GetMapping("/")
     public List<AccountDTO> findAllAccounts() {
@@ -63,5 +66,12 @@ public class AccountApiController {
         account.setInstitution(institution);
 
         return new AccountDTO(accountRepository.save(account));
+    }
+
+    @GetMapping("/balances/import")
+    public List<AccountDTO> importAccountBalances() {
+        importService.beginBalanceSummaryImport();
+        List<Account> all = accountRepository.findAll();
+        return all.stream().map(AccountDTO::new).collect(Collectors.toList());
     }
 }

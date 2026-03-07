@@ -24,6 +24,8 @@ import java.util.Optional;
 public class TransactionImporterService {
     private final TransactionService transactionService;
 
+    private final ImportService importService;
+
     public List<TransactionDTO> importTransactions(final String contentBody) {
         // Many CSV formats surround each section with double quotes.
         // Proactively strip them out
@@ -58,6 +60,27 @@ public class TransactionImporterService {
         List<TransactionDTO> savedTransactions = saveTransactions(transactions);
         if (savedTransactions.isEmpty() || transactions.size() != savedTransactions.size()) {
             log.error("Error saving transactions");
+        }
+
+        return savedTransactions;
+    }
+
+    public List<TransactionDTO> importMailTransactions() {
+        List<Transaction> transactions = importService.beginTransactionImport();
+
+        List<TransactionDTO> savedTransactions = new ArrayList<>();
+        for (Transaction transaction : transactions) {
+            TransactionDTO dto = new TransactionDTO();
+            dto.setDate(transaction.getDate());
+            dto.setDescription(transaction.getDescription());
+            dto.setOriginalDescription(transaction.getOriginalDescription());
+            dto.setAmount(transaction.getAmount());
+            dto.setType(transaction.getTransactionType());
+            dto.setCategory(transaction.getCategory().getName());
+            dto.setVendor(transaction.getMerchant().getName());
+            dto.setAccountName(transaction.getAccount().getName());
+            dto.setMailMessageId(transaction.getMailMessageId());
+            dto.setNotes(transaction.getNotes());
         }
 
         return savedTransactions;
