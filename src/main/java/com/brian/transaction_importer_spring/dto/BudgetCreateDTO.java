@@ -17,9 +17,9 @@ public class BudgetCreateDTO {
 
     private BigDecimal limitAmount;
 
-    private BudgetPeriod period; // MONTHLY, WEEKLY, YEARLY
+    private BudgetPeriod period;
 
-    private Long categoryId; // ties to your existing category model
+    private Long categoryId;
 
     private Long accountId;
 

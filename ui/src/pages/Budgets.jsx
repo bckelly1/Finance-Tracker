@@ -30,36 +30,7 @@ function Budgets() {
             setError(null);
         } catch (err) {
             setError(err.message);
-            // Mock data for demonstration
-            setBudgets([
-                {
-                    id: 1,
-                    name: 'Groceries Budget',
-                    limitAmount: 500.00,
-                    spent: 342.50,
-                    remaining: 157.50,
-                    percentUsed: 68.5,
-                    isOverBudget: false
-                },
-                {
-                    id: 2,
-                    name: 'Dining Out',
-                    limitAmount: 200.00,
-                    spent: 225.80,
-                    remaining: -25.80,
-                    percentUsed: 112.9,
-                    isOverBudget: true
-                },
-                {
-                    id: 3,
-                    name: 'Entertainment',
-                    limitAmount: 150.00,
-                    spent: 45.00,
-                    remaining: 105.00,
-                    percentUsed: 30.0,
-                    isOverBudget: false
-                }
-            ]);
+            console.error("Error fetching budgets", err);
         } finally {
             setLoading(false);
         }
@@ -72,13 +43,7 @@ function Budgets() {
             const data = await response.json();
             setCategories(Array.isArray(data) ? data : []);
         } catch (err) {
-            setCategories([
-                { id: 1, name: 'Groceries' },
-                { id: 2, name: 'Dining' },
-                { id: 3, name: 'Entertainment' },
-                { id: 4, name: 'Transportation' },
-                { id: 5, name: 'Utilities' }
-            ]);
+            console.error("Error fetching categories", err);
         }
     };
 
@@ -89,10 +54,7 @@ function Budgets() {
             const data = await response.json();
             setAccounts(Array.isArray(data) ? data : []);
         } catch (err) {
-            setAccounts([
-                { id: 1, name: 'Checking Account' },
-                { id: 2, name: 'Credit Card' }
-            ]);
+            console.error("Error fetching accounts", err);
         }
     };
 
