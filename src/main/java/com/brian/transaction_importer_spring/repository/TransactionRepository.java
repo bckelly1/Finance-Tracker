@@ -24,5 +24,5 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
     List<Transaction> findTransactionByCategory(@Param("category") Category category);
 
     @Query("FROM Transaction t where t.category = :category AND t.date > :start AND t.date <= :end")
-    BigDecimal sumByCategory(@Param("category") Category category, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+    List<Transaction> findTransactionsByCategoryBetweenDates(@Param("category") Category category, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 }

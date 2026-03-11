@@ -3,6 +3,7 @@ package com.brian.transaction_importer_spring.service;
 import com.brian.transaction_importer_spring.dto.BudgetCreateDTO;
 import com.brian.transaction_importer_spring.dto.BudgetDTO;
 import com.brian.transaction_importer_spring.entity.Budget;
+import com.brian.transaction_importer_spring.entity.Transaction;
 import com.brian.transaction_importer_spring.enums.BudgetPeriod;
 import com.brian.transaction_importer_spring.repository.AccountRepository;
 import com.brian.transaction_importer_spring.repository.BudgetRepository;
@@ -48,7 +49,6 @@ public class BudgetService {
         budget.setName(budgetCreateDTO.getName());
         budget.setLimitAmount(budgetCreateDTO.getLimitAmount());
         budget.setPeriod(budgetCreateDTO.getPeriod());
-        budget.setStartDate(budgetCreateDTO.getStartDate());
 
         categoryRepository.findById(budgetCreateDTO.getCategoryId()).ifPresent(budget::setCategory);
         accountRepository.findById(budgetCreateDTO.getAccountId()).ifPresent(budget::setAccount);
@@ -81,13 +81,17 @@ public class BudgetService {
         LocalDateTime start = calculateStart(budget.getPeriod());
         LocalDateTime end = calculateEnd();
 
-        BigDecimal spent = transactionRepository.sumByCategory(
+        List<Transaction> transactions = transactionRepository.findTransactionsByCategoryBetweenDates(
                 budget.getCategory(),
                 start,
                 end
         );
+        BigDecimal totalSpent = BigDecimal.ZERO;
+        for(Transaction transaction : transactions) {
+            totalSpent = totalSpent.add(BigDecimal.valueOf(transaction.getAmount()));
+        }
 
-        return toBudgetDTO(budget, spent);
+        return toBudgetDTO(budget, totalSpent);
     }
 
     private LocalDateTime calculateStart(final BudgetPeriod budgetPeriod) {
@@ -130,6 +134,7 @@ public class BudgetService {
         budgetDTO.setRemaining(remaining);
         budgetDTO.setPercentUsed(percentUsed);
         budgetDTO.setOverBudget(percentUsed > 1);
+        budgetDTO.setSpent(spent);
         return budgetDTO;
     }
 }
