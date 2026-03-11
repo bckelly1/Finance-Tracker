@@ -87,7 +87,7 @@ public class BudgetService {
                 end
         );
         BigDecimal totalSpent = BigDecimal.ZERO;
-        for(Transaction transaction : transactions) {
+        for (Transaction transaction : transactions) {
             totalSpent = totalSpent.add(BigDecimal.valueOf(transaction.getAmount()));
         }
 
