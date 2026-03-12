@@ -54,7 +54,7 @@ function Bills() {
                 throw new Error('Failed to update bill');
             }
 
-            await fetchBills(); // Refresh to get updated spent/remaining values
+            await fetchBills();
             handleCloseModal();
         } catch (err) {
             console.error('Error updating bill:', err);
@@ -94,9 +94,9 @@ function Bills() {
                 throw new Error('Failed to create bill');
             }
 
-            await fetchBills(); // Refresh list
+            await fetchBills();
             setShowCreateModal(false);
-            alert('Budget created successfully!');
+            alert('Bill created successfully!');
         } catch (err) {
             console.error('Error creating bill:', err);
             alert('Failed to create bill');
@@ -108,6 +108,17 @@ function Bills() {
             style: 'currency',
             currency: 'USD',
         }).format(amount);
+    };
+
+    const formatDate = (dateString) => {
+        // Parse as UTC, then display in local timezone
+        const date = new Date(dateString + ' UTC');
+
+        return date.toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
     };
 
     if (loading) {
@@ -163,23 +174,28 @@ function Bills() {
                             onClick={() => handleRowClick(bill)}
                         >
                             <div className="bill-header">
-                                <h3 className="bill-name">{bill.name}</h3>
-                                {bill.isBillArrived && (
-                                    <span className="over-budget-badge">Bill arrived</span>
+                                <div>
+                                    <h3 className="bill-name">{bill.name}</h3>
+                                    {bill.transactionDescription && (
+                                        <p className="bill-description">{bill.transactionDescription}</p>
+                                    )}
+                                </div>
+                                {bill.billArrived && (
+                                    <span className="over-budget-badge">Bill Arrived</span>
                                 )}
                             </div>
 
                             <div className="bill-amounts">
                                 <div className="bill-amount-item">
                                     <span className="amount-label">Amount</span>
-                                    <span className={`amount-value ${bill.isBillArrived ? 'arrived' : ''}`}>
-                                      {formatCurrency(bill.amount)}
+                                    <span className={`amount-value ${bill.billArrived ? 'arrived' : ''}`}>
+                                        {formatCurrency(bill.amount)}
                                     </span>
                                 </div>
                                 <div className="bill-date-item">
                                     <span className="date-label">Arrival</span>
-                                    <span className={`date-value`}>
-                                      {formatCurrency(bill.date)}
+                                    <span className="date-value">
+                                        {formatDate(bill.date)}
                                     </span>
                                 </div>
                             </div>

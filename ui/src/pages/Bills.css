@@ -41,7 +41,15 @@
     flex: 1;
 }
 
-.over-bill-badge {
+.bill-description {
+    font-size: 0.875rem;
+    color: var(--color-text-tertiary);
+    margin: 0.25rem 0 0 0;
+    font-style: italic;
+}
+
+/* Unified badge — used for "Bill arrived" */
+.over-budget-badge {
     background: var(--color-danger);
     color: white;
     font-size: 0.75rem;
@@ -56,7 +64,7 @@
 /* Bill Amounts */
 .bill-amounts {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
     margin-bottom: 1.25rem;
     padding-bottom: 1.25rem;
@@ -69,7 +77,15 @@
     gap: 0.25rem;
 }
 
-.amount-label {
+/* Date item — mirrors amount-item layout */
+.bill-date-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.amount-label,
+.date-label {
     font-size: 0.75rem;
     color: var(--color-text-tertiary);
     font-weight: 600;
@@ -84,6 +100,17 @@
     font-family: 'DM Sans', sans-serif;
 }
 
+.date-value {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    font-family: 'DM Sans', sans-serif;
+}
+
+.amount-value.arrived {
+    color: var(--color-danger);
+}
+
 .amount-value.over {
     color: var(--color-danger);
 }
@@ -94,52 +121,6 @@
 
 .amount-value.positive {
     color: var(--color-success);
-}
-
-/* Progress Bar */
-.progress-container {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.progress-bar-wrapper {
-    width: 100%;
-    height: 12px;
-    background: var(--color-bg);
-    border-radius: 1rem;
-    overflow: hidden;
-    position: relative;
-}
-
-.progress-bar {
-    height: 100%;
-    border-radius: 1rem;
-    transition: width 0.5s ease, background-color 0.3s ease;
-    position: relative;
-}
-
-.progress-bar.healthy {
-    background: linear-gradient(90deg, #10b981 0%, #059669 100%);
-}
-
-.progress-bar.caution {
-    background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
-}
-
-.progress-bar.warning {
-    background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
-}
-
-.progress-bar.over-bill {
-    background: linear-gradient(90deg, #dc2626 0%, #991b1b 100%);
-}
-
-.progress-text {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--color-text-secondary);
-    text-align: right;
 }
 
 /* Empty State */
@@ -172,7 +153,8 @@
         gap: 0.75rem;
     }
 
-    .amount-value {
+    .amount-value,
+    .date-value {
         font-size: 1rem;
     }
 }
