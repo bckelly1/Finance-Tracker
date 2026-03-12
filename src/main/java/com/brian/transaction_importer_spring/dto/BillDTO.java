@@ -4,25 +4,17 @@ import com.brian.transaction_importer_spring.enums.CalendarPeriod;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.util.Date;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BudgetCreateDTO {
+public class BillDTO {
     private Long id;
-
     private String name;
-
-    private BigDecimal limitAmount;
-
+    private String transactionDescription;
     private CalendarPeriod period;
-
-    private Long categoryId;
-
-    private Long accountId;
-
-    private LocalDate startDate;
-
+    private double amount;
+    private Date date;
+    private boolean isBillArrived;
 }
