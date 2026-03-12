@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-do
 import Transactions from './pages/Transactions';
 import Accounts from './pages/Accounts';
 import Budgets from './pages/Budgets';
+import Bills from './pages/Bills';
 import Categories from './pages/Categories';
 import Institutions from './pages/Institutions';
 import UnknownTransactions from './pages/UnknownTransactions';
@@ -41,6 +42,11 @@ function App() {
                             <span className="nav-text">Budgets</span>
                         </NavLink>
 
+                        <NavLink to="/bills" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                            <span className="nav-icon">💰</span>
+                            <span className="nav-text">Bills</span>
+                        </NavLink>
+
                         <NavLink to="/accounts" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
                             <span className="nav-icon">🏦</span>
                             <span className="nav-text">Accounts</span>
@@ -73,6 +79,7 @@ function App() {
                         <Route path="/transactions" element={<Transactions />} />
                         <Route path="/unknown-transactions" element={<UnknownTransactions />} />
                         <Route path="/budgets" element={<Budgets />} />
+                        <Route path="/bills" element={<Bills />} />
                         <Route path="/accounts" element={<Accounts />} />
                         <Route path="/categories" element={<Categories />} />
                         <Route path="/vendors" element={<Vendors />} />

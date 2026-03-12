@@ -4,6 +4,8 @@ import com.brian.transaction_importer_spring.enums.CalendarPeriod;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.sql.Timestamp;
 import java.util.Date;
 
 @Data
@@ -14,7 +16,7 @@ public class BillDTO {
     private String name;
     private String transactionDescription;
     private CalendarPeriod period;
-    private double amount;
-    private Date date;
+    private Double amount;
+    private Timestamp date;
     private boolean isBillArrived;
 }

@@ -61,14 +61,8 @@ public class BillService {
         billRepository.deleteById(id);
     }
 
-    private boolean hasBillArrived(final long id) {
-        BillDTO bill = getBill(id);
-        if (bill == null) {
-            log.error("Bill id {} not found", id);
-            return false;
-        }
-
-        List<Transaction> transactionsByDescriptionAfter = transactionRepository.findTransactionsByDescriptionAfter(bill.getTransactionDescription(), calculateStart(bill.getPeriod()));
+    private boolean hasBillArrived(final Bill bill) {
+        List<Transaction> transactionsByDescriptionAfter = transactionRepository.findTransactionsByDescriptionIsAfter(bill.getTransactionDescription(), calculateStart(bill.getPeriod()));
         return !transactionsByDescriptionAfter.isEmpty();
     }
 
@@ -114,7 +108,7 @@ public class BillService {
         saveDTO.setPeriod(save.getPeriod());
         saveDTO.setTransactionDescription(save.getTransactionDescription());
 
-        saveDTO.setBillArrived(hasBillArrived(save.getId()));
+        saveDTO.setBillArrived(hasBillArrived(save));
         return saveDTO;
     }
 }

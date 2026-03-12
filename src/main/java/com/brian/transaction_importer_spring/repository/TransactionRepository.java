@@ -25,5 +25,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
     @Query("FROM Transaction t where t.category = :category AND t.date > :start AND t.date <= :end")
     List<Transaction> findTransactionsByCategoryBetweenDates(@Param("category") Category category, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
-    List<Transaction> findTransactionsByDescriptionAfter(String descriptionAfter, LocalDateTime start);
+    @Query("FROM Transaction t where t.description = :description AND t.date > :start")
+    List<Transaction> findTransactionsByDescriptionIsAfter(@Param("description") String description, @Param("start") LocalDateTime start);
 }
