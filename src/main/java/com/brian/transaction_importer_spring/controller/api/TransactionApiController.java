@@ -9,6 +9,7 @@ import com.brian.transaction_importer_spring.repository.TransactionRepository;
 import com.brian.transaction_importer_spring.service.TransactionImporterService;
 import com.brian.transaction_importer_spring.service.TransactionService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @AllArgsConstructor
+@Slf4j
 @RequestMapping("/api/transactions")
 public class TransactionApiController {
 
@@ -137,6 +139,7 @@ public class TransactionApiController {
             List<TransactionDTO> transactions = transactionImporterService.importMailTransactions();
             return ResponseEntity.ok(transactions);
         } catch (Exception e) {
+            log.error("Error while importing mail transactions", e);
             return ResponseEntity.badRequest().build();
         }
     }
