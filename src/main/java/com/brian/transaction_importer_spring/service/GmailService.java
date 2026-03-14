@@ -2,13 +2,7 @@ package com.brian.transaction_importer_spring.service;
 
 import com.brian.transaction_importer_spring.config.MailConfig;
 import com.brian.transaction_importer_spring.entity.MailMessage;
-import jakarta.mail.Flags;
-import jakarta.mail.Folder;
-import jakarta.mail.Header;
-import jakarta.mail.Message;
-import jakarta.mail.MessagingException;
-import jakarta.mail.Session;
-import jakarta.mail.Store;
+import jakarta.mail.*;
 import jakarta.mail.internet.MimeMultipart;
 import jakarta.mail.search.AndTerm;
 import jakarta.mail.search.FlagTerm;
@@ -31,20 +25,47 @@ import java.util.Properties;
 public class GmailService {
     private final MailConfig mailConfig;
 
+    private Store store;
+    private Session session;
+
+    private Store getStore() {
+        if (store == null || !store.isConnected()) {
+            Properties properties = new Properties();
+            properties.setProperty("mail.store.protocol", "imaps");
+
+            session = Session.getInstance(properties, null);
+            try {
+                store = session.getStore("imaps");
+                store.connect(mailConfig.getHost(), mailConfig.getUsername(), mailConfig.getPassword());
+            } catch (final MessagingException e) {
+                log.error("Error connecting to imaps server", e);
+                throw new RuntimeException(e);
+            }
+            log.info("Created new Gmail IMAP connection");
+        }
+        return store;
+    }
+
+    private Folder openFolder(final String label, final int mode) {
+        Folder folder = null;
+        try {
+            folder = getStore().getFolder(label);
+            folder.open(mode);
+        } catch (MessagingException e) {
+            log.error("Error opening folder", e);
+            throw new RuntimeException(e);
+        }
+        return folder;
+    }
+
     public MailMessage[] getUnreadMessages(final String filter, final String label) {
         // Gmail IMAP properties
         Properties properties = new Properties();
         properties.setProperty("mail.store.protocol", "imaps");
 
         try {
-            // Create session and authenticate
-            Session session = Session.getInstance(properties, null);
-            Store store = session.getStore("imaps");
-            store.connect(mailConfig.getHost(), mailConfig.getUsername(), mailConfig.getPassword());
-
             // Open inbox folder
-            Folder inbox = store.getFolder(label);
-            inbox.open(Folder.READ_ONLY);
+            Folder inbox = openFolder(label, Folder.READ_ONLY);
 
             // Create a search term for unread messages
             SearchTerm unreadTerm = new FlagTerm(new Flags(Flags.Flag.SEEN), false);
@@ -60,7 +81,6 @@ public class GmailService {
 
             // Close resources
             inbox.close(false);
-            store.close();
 
             return mailMessages;
         } catch (MessagingException e) {
@@ -144,14 +164,8 @@ public class GmailService {
         properties.setProperty("mail.store.protocol", "imaps");
 
         try {
-            // Create session and authenticate
-            Session session = Session.getInstance(properties, null);
-            Store store = session.getStore("imaps");
-            store.connect(mailConfig.getHost(), mailConfig.getUsername(), mailConfig.getPassword());
-
             // Open inbox folder
-            Folder inbox = store.getFolder(mailMessage.getLabel());
-            inbox.open(Folder.READ_WRITE);
+            Folder inbox = openFolder(mailMessage.getLabel(), Folder.READ_WRITE);
 
             //Should only be one record
             SearchTerm searchTerm = new MessageIDTerm(mailMessage.getMessageId());
