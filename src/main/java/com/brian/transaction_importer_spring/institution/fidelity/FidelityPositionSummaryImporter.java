@@ -5,6 +5,7 @@ import com.brian.transaction_importer_spring.entity.Account;
 import com.brian.transaction_importer_spring.entity.AccountHistory;
 import com.brian.transaction_importer_spring.repository.AccountHistoryRepository;
 import com.brian.transaction_importer_spring.repository.AccountRepository;
+import com.brian.transaction_importer_spring.service.FileWriterService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.jsoup.Jsoup;
@@ -28,8 +29,14 @@ public class FidelityPositionSummaryImporter {
 
     private final AccountHistoryRepository accountHistoryRepository;
 
+    private final FileWriterService fileWriterService;
+
+    public static final String LAST_SUMMARY_PATH = "last_fidelity_summary.html";
+
+
     public void handlePositionSummary(final String summaryEmailText) {
         Document document = Jsoup.parse(summaryEmailText);
+        fileWriterService.writeToFile(LAST_SUMMARY_PATH, document.html());
         Elements elements = document.select("td:contains(XXXXX)");
         Element element = elements.getLast();
         String text = element.text();

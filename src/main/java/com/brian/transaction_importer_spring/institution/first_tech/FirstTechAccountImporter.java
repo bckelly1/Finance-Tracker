@@ -5,6 +5,7 @@ import com.brian.transaction_importer_spring.entity.Account;
 import com.brian.transaction_importer_spring.entity.AccountHistory;
 import com.brian.transaction_importer_spring.repository.AccountHistoryRepository;
 import com.brian.transaction_importer_spring.repository.AccountRepository;
+import com.brian.transaction_importer_spring.service.FileWriterService;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -24,8 +25,11 @@ public class FirstTechAccountImporter {
 
     private final AccountRepository accountRepository;
 
-
     private final AccountHistoryRepository accountHistoryRepository;
+
+    private final FileWriterService fileWriterService;
+
+    public static final String LAST_ACCOUNT_PATH = "last_first_tech_account.html";
 
     // In the main body of the email, figure out which account we are extracting the balance of.
     public MinimumAccount[] parseAccountInfo(final Document document) {
@@ -59,6 +63,7 @@ public class FirstTechAccountImporter {
     // Extract all account details from the balance summary email
     public void handleBalanceSummary(final String text) {
         Document soup = Jsoup.parse(text);
+        fileWriterService.writeToFile(LAST_ACCOUNT_PATH, soup.html());
         MinimumAccount[] minimumAccounts = parseAccountInfo(soup);
         for (MinimumAccount minimumAccount : minimumAccounts) {
             Account account = accountRepository.findByAlias(minimumAccount.getNumber());

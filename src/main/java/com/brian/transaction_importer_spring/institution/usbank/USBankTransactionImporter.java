@@ -6,6 +6,7 @@ import com.brian.transaction_importer_spring.repository.AccountRepository;
 import com.brian.transaction_importer_spring.repository.CategoryRepository;
 import com.brian.transaction_importer_spring.repository.VendorRepository;
 import com.brian.transaction_importer_spring.service.CategoryInfererService;
+import com.brian.transaction_importer_spring.service.FileWriterService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -25,11 +26,17 @@ public class USBankTransactionImporter {
 
     private final AccountRepository accountRepository;
 
+    private final FileWriterService fileWriterService;
+
+    public static final String LAST_TRANSACTION_PATH = "last_us_bank_transaction.html";
+
+
     public Transaction handleTransactionEmail(final MailMessage mailMessage) {
         return handleTransactions(mailMessage);
     }
 
     private Transaction handleTransactions(final MailMessage mailMessage) {
+        fileWriterService.writeToFile(LAST_TRANSACTION_PATH, mailMessage.getHtml());
         String body = cleanBody(mailMessage.getBody());
         String[] lines = body.split("\n");
         String originalDescription = cleanOriginalDescription(lines[3]);

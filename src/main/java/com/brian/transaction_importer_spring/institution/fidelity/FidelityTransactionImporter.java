@@ -6,6 +6,7 @@ import com.brian.transaction_importer_spring.repository.AccountRepository;
 import com.brian.transaction_importer_spring.repository.CategoryRepository;
 import com.brian.transaction_importer_spring.repository.VendorRepository;
 import com.brian.transaction_importer_spring.service.CategoryInfererService;
+import com.brian.transaction_importer_spring.service.FileWriterService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.jsoup.Jsoup;
@@ -27,6 +28,11 @@ public class FidelityTransactionImporter {
     private final VendorRepository vendorRepository;
 
     private final AccountRepository accountRepository;
+
+    private final FileWriterService fileWriterService;
+
+    public static final String LAST_TRANSACTION_PATH = "last_fidelity_transaction.html";
+
 
     private String findCurrencyToken(final String[] description) {
         for (String word : description) {
@@ -167,6 +173,7 @@ public class FidelityTransactionImporter {
     public ArrayList<String> parseMailMessage(final MailMessage mailMessage) {
         String body = mailMessage.getBody();
         Document document = Jsoup.parse(body);
+        fileWriterService.writeToFile(LAST_TRANSACTION_PATH, document.html());
         String content = document.wholeText();
         content = content.replace("\n\n", "\n");
         String[] array = content.split("\n");
