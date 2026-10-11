@@ -1,4 +1,4 @@
-FROM maven:3.9.6
+FROM maven:3.10.0
 
 WORKDIR /usr/src/transactions
 
