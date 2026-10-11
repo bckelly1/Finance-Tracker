@@ -14,7 +14,7 @@
     <name>transaction_importer_spring</name>
     <description>transaction_importer_spring</description>
     <properties>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
     </properties>
     <dependencies>
         <dependency>
@@ -77,7 +77,7 @@
 
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
+            <artifactId>okhttp-jvm</artifactId>
             <version>5.5.0</version>
         </dependency>
 
@@ -124,6 +124,19 @@
                     <encoding>UTF-8</encoding>
                     <consoleOutput>true</consoleOutput> <!-- Print results to console -->
                     <failOnViolation>true</failOnViolation>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+<!--                            <version>${lombok.version}</version>-->
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
         </plugins>
