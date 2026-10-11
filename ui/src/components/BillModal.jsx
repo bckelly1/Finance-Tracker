@@ -4,8 +4,10 @@ import './TransactionModal.css';
 function BillModal({ bill, onClose, onSave, onDelete }) {
     const [formData, setFormData] = useState({
         name: '',
+        transactionDescription: '',
         amount: '',
-        period: 'MONTHLY',
+        scheduleType: '',
+        scheduleValue: '',
         start: ''
     });
 
@@ -13,8 +15,10 @@ function BillModal({ bill, onClose, onSave, onDelete }) {
         if (bill) {
             setFormData({
                 name: bill.name || '',
-                amount: bill.limitAmount || '',
-                period: bill.period || 'MONTHLY',
+                transactionDescription: bill.transactionDescription || '',
+                amount: bill.amount || '',
+                scheduleType: bill.scheduleType || '',
+                scheduleValue: bill.scheduleValue || '',
                 start: bill.start || ''
             });
         }
@@ -39,13 +43,6 @@ function BillModal({ bill, onClose, onSave, onDelete }) {
         }
     };
 
-    const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-        }).format(amount);
-    };
-
     if (!bill) return null;
 
     return (
@@ -56,21 +53,14 @@ function BillModal({ bill, onClose, onSave, onDelete }) {
                     <button className="modal-close" onClick={onClose}>×</button>
                 </div>
 
-                <div className="bill">
-                    <div className="summary-item">
-                        <span className="summary-label">Spent</span>
-                        <span className="summary-value">{formatCurrency(bill.amount)}</span>
-                    </div>
-                </div>
-
                 <form onSubmit={handleSubmit} className="modal-form">
                     <div className="form-group">
-                        <label>bill ID</label>
+                        <label>Bill ID</label>
                         <input type="text" value={bill.id} disabled />
                     </div>
 
                     <div className="form-group">
-                        <label>bill Name *</label>
+                        <label>Bill Name *</label>
                         <input
                             type="text"
                             name="name"
@@ -80,9 +70,42 @@ function BillModal({ bill, onClose, onSave, onDelete }) {
                         />
                     </div>
 
+                    <div className="form-group">
+                        <label>Description *</label>
+                        <input
+                            type="text"
+                            name="name"
+                            value={formData.transactionDescription}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label>Description *</label>
+                        <input
+                            type="text"
+                            name="scheduleType"
+                            value={formData.scheduleType}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label>Description *</label>
+                        <input
+                            type="text"
+                            name="scheduleValue"
+                            value={formData.scheduleValue}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+
                     <div className="form-row">
                         <div className="form-group">
-                            <label>Limit Amount *</label>
+                            <label>Amount *</label>
                             <input
                                 type="number"
                                 step="0.01"
@@ -92,31 +115,6 @@ function BillModal({ bill, onClose, onSave, onDelete }) {
                                 required
                             />
                         </div>
-
-                        <div className="form-group">
-                            <label>Period *</label>
-                            <select
-                                name="period"
-                                value={formData.period}
-                                onChange={handleChange}
-                                required
-                            >
-                                <option value="WEEKLY">Weekly</option>
-                                <option value="MONTHLY">Monthly</option>
-                                <option value="YEARLY">Yearly</option>
-                            </select>
-                        </div>
-                    </div>
-
-
-                    <div className="form-group">
-                        <label>Start Date</label>
-                        <input
-                            type="date"
-                            name="start"
-                            value={formData.start}
-                            onChange={handleChange}
-                        />
                     </div>
 
                     <div className="modal-actions">

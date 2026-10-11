@@ -167,13 +167,12 @@ public class FirstTechTransactionImporter {
     private double extractAmount(final Element element) {
         String transactionAmount = element.select("td.trans-amount").text().strip().replace("$", "").replace(",", "");
         double amount;
-        String transactionType;
         if (transactionAmount.contains("(")) {
             amount = Double.parseDouble(transactionAmount.replace("(", "").replace(")", ""));
-            transactionType = "Debit";
+        } else if (transactionAmount.contains("-")) {
+            amount = Double.parseDouble(transactionAmount.replace("-", ""));
         } else {
             amount = Double.parseDouble(transactionAmount);
-            transactionType = "Credit";
         }
 
         return amount;
@@ -183,6 +182,8 @@ public class FirstTechTransactionImporter {
         String transactionAmount = element.select("td.trans-amount").text().strip().replace("$", "").replace(",", "");
         String transactionType;
         if (transactionAmount.contains("(")) {
+            transactionType = "Debit";
+        } else if (transactionAmount.contains("-")) {
             transactionType = "Debit";
         } else {
             transactionType = "Credit";

@@ -3,14 +3,21 @@ package com.brian.transaction_importer_spring.service;
 import com.brian.transaction_importer_spring.dto.BillDTO;
 import com.brian.transaction_importer_spring.entity.Bill;
 import com.brian.transaction_importer_spring.entity.Transaction;
-import com.brian.transaction_importer_spring.enums.CalendarPeriod;
+import com.brian.transaction_importer_spring.enums.ScheduleType;
 import com.brian.transaction_importer_spring.repository.BillRepository;
 import com.brian.transaction_importer_spring.repository.TransactionRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.time.ZoneId;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -19,6 +26,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class BillService {
+
+    private final ObjectMapper objectMapper;
+
     private final TransactionRepository transactionRepository;
 
     private final BillRepository billRepository;
@@ -62,31 +72,12 @@ public class BillService {
     }
 
     private boolean hasBillArrived(final Bill bill) {
-        List<Transaction> transactionsByDescriptionAfter = transactionRepository.findTransactionsByDescriptionIsAfter(bill.getTransactionDescription(), calculateStart(bill.getPeriod()));
+        List<Transaction> transactionsByDescriptionAfter = transactionRepository.findTransactionsByDescriptionIsAfter(bill.getTransactionDescription(), calculateStart(bill.getScheduleType(), bill.getScheduleValue()));
         return !transactionsByDescriptionAfter.isEmpty();
     }
 
-    private LocalDateTime calculateStart(final CalendarPeriod calendarPeriod) {
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.clear(Calendar.MINUTE);
-        cal.clear(Calendar.SECOND);
-        cal.clear(Calendar.MILLISECOND);
-
-        return switch (calendarPeriod) {
-            case MONTHLY -> {
-                cal.set(Calendar.DAY_OF_MONTH, 1);
-                yield LocalDateTime.ofInstant(cal.toInstant(), ZoneId.systemDefault());
-            }
-            case WEEKLY -> {
-                cal.set(Calendar.DAY_OF_WEEK, cal.getFirstDayOfWeek());
-                yield LocalDateTime.ofInstant(cal.toInstant(), ZoneId.systemDefault());
-            }
-            case YEARLY -> {
-                cal.set(Calendar.DAY_OF_YEAR, 1);
-                yield LocalDateTime.ofInstant(cal.toInstant(), ZoneId.systemDefault());
-            }
-        };
+    private LocalDateTime calculateStart(final ScheduleType scheduleType, final String scheduleValue) {
+        return LocalDateTime.now();
     }
 
     private Bill getBillEntity(BillDTO billDTO) {
@@ -94,7 +85,8 @@ public class BillService {
         bill.setName(billDTO.getName());
         bill.setAmount(billDTO.getAmount());
         bill.setDate(billDTO.getDate());
-        bill.setPeriod(billDTO.getPeriod());
+        bill.setScheduleType(billDTO.getScheduleType());
+        bill.setScheduleValue(billDTO.getScheduleValue());
         bill.setTransactionDescription(billDTO.getTransactionDescription());
         return bill;
     }
@@ -105,10 +97,87 @@ public class BillService {
         saveDTO.setName(save.getName());
         saveDTO.setAmount(save.getAmount());
         saveDTO.setDate(save.getDate());
-        saveDTO.setPeriod(save.getPeriod());
+        saveDTO.setScheduleType(save.getScheduleType());
+        saveDTO.setScheduleValue(save.getScheduleValue());
         saveDTO.setTransactionDescription(save.getTransactionDescription());
 
         saveDTO.setBillArrived(hasBillArrived(save));
         return saveDTO;
+    }
+
+    /**
+     * Returns all due dates for a bill within the given month.
+     * DOM bills return one date; NTH_WEEKDAY bills may return multiple.
+     */
+    public List<LocalDate> getDueDatesForMonth(Bill bill, YearMonth month) {
+        return switch (bill.getScheduleType()) {
+            case DAY_OF_MONTH         -> resolveDom(bill.getScheduleValue(), month);
+            case NTH_WEEKDAY -> resolveNthWeekday(bill.getScheduleValue(), month);
+        };
+    }
+
+    // --- DOM -----------------------------------------------------------------
+
+    private List<LocalDate> resolveDom(String scheduleValue, YearMonth month) {
+        int day = Integer.parseInt(scheduleValue);
+
+        // Clamp to the last valid day of the month (e.g. "31" in February → 28/29)
+        int actualDay = Math.min(day, month.lengthOfMonth());
+        return List.of(LocalDate.of(month.getYear(), month.getMonth(), actualDay));
+    }
+
+    // --- NTH_WEEKDAY ---------------------------------------------------------
+
+    private List<LocalDate> resolveNthWeekday(String scheduleValue, YearMonth month) {
+        List<NthWeekdayRule> rules = parseRules(scheduleValue);
+        List<LocalDate> dates = new ArrayList<>();
+
+        for (NthWeekdayRule rule : rules) {
+            LocalDate date = nthWeekdayOfMonth(month, rule.n(), rule.wd());
+            if (date != null) {
+                dates.add(date);
+            }
+        }
+
+        dates.sort(null); // ascending order
+        return dates;
+    }
+
+    /**
+     * Returns the nth occurrence of a given ISO weekday in the month,
+     * or null if that occurrence doesn't exist (e.g. 5th Friday in a short month).
+     *
+     * @param month  the target month
+     * @param n      occurrence index (1=first, 2=second, …)
+     * @param isoWd  ISO weekday (1=Monday, 7=Sunday)
+     */
+    private LocalDate nthWeekdayOfMonth(YearMonth month, int n, int isoWd) {
+        DayOfWeek dow = DayOfWeek.of(isoWd);
+
+        // Find the FIRST occurrence of this weekday in the month
+        LocalDate first = LocalDate.of(month.getYear(), month.getMonth(), 1)
+                .with(TemporalAdjusters.nextOrSame(dow));
+
+        // Step forward (n-1) weeks
+        LocalDate result = first.plusWeeks(n - 1);
+
+        // Guard: make sure we haven't spilled into the next month
+        return result.getMonth() == month.getMonth() ? result : null;
+    }
+
+    // --- JSON helpers --------------------------------------------------------
+
+    private List<NthWeekdayRule> parseRules(String json) {
+        try {
+            return objectMapper.readValue(json, new TypeReference<List<NthWeekdayRule>>() {});
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid NTH_WEEKDAY schedule_value: " + json, e);
+        }
+    }
+
+    // A single "nth weekday" rule, e.g. {n=1, wd=5} = "1st Friday"
+    public record NthWeekdayRule(int n, int wd) {
+        // n  : 1–4 (1st, 2nd, 3rd, 4th)
+        // wd : 1–7 (ISO: 1=Monday, 7=Sunday)
     }
 }
