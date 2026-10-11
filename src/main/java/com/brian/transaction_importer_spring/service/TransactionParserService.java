@@ -41,7 +41,7 @@ public class TransactionParserService {
         }
 
         assert transactions != null && transactions.length > 0;
-//        transactionRepository.saveAll(Arrays.asList(transactions));
+        transactionRepository.saveAll(Arrays.asList(transactions));
         return transactions;
     }
 
