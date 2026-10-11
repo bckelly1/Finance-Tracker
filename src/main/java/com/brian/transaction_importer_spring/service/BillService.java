@@ -11,15 +11,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
-import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 @Service
@@ -108,6 +105,11 @@ public class BillService {
     /**
      * Returns all due dates for a bill within the given month.
      * DOM bills return one date; NTH_WEEKDAY bills may return multiple.
+     *
+     * @param bill The bill for the month
+     * @param month The month of the year for the bill
+     *
+     * @return All due dates for the bill for this month
      */
     public List<LocalDate> getDueDatesForMonth(Bill bill, YearMonth month) {
         return switch (bill.getScheduleType()) {
@@ -150,6 +152,8 @@ public class BillService {
      * @param month  the target month
      * @param n      occurrence index (1=first, 2=second, …)
      * @param isoWd  ISO weekday (1=Monday, 7=Sunday)
+     *
+     * @return LocalDate which day the bill is due
      */
     private LocalDate nthWeekdayOfMonth(YearMonth month, int n, int isoWd) {
         DayOfWeek dow = DayOfWeek.of(isoWd);
@@ -169,7 +173,7 @@ public class BillService {
 
     private List<NthWeekdayRule> parseRules(String json) {
         try {
-            return objectMapper.readValue(json, new TypeReference<List<NthWeekdayRule>>() {});
+            return objectMapper.readValue(json, new TypeReference<List<NthWeekdayRule>>() { });
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid NTH_WEEKDAY schedule_value: " + json, e);
         }
