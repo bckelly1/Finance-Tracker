@@ -1,6 +1,6 @@
 package com.brian.transaction_importer_spring.dto;
 
-import com.brian.transaction_importer_spring.enums.BudgetPeriod;
+import com.brian.transaction_importer_spring.enums.CalendarPeriod;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,7 +17,7 @@ public class BudgetCreateDTO {
 
     private BigDecimal limitAmount;
 
-    private BudgetPeriod period;
+    private CalendarPeriod period;
 
     private Long categoryId;
 

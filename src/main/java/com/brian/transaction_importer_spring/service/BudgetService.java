@@ -4,7 +4,7 @@ import com.brian.transaction_importer_spring.dto.BudgetCreateDTO;
 import com.brian.transaction_importer_spring.dto.BudgetDTO;
 import com.brian.transaction_importer_spring.entity.Budget;
 import com.brian.transaction_importer_spring.entity.Transaction;
-import com.brian.transaction_importer_spring.enums.BudgetPeriod;
+import com.brian.transaction_importer_spring.enums.CalendarPeriod;
 import com.brian.transaction_importer_spring.repository.AccountRepository;
 import com.brian.transaction_importer_spring.repository.BudgetRepository;
 import com.brian.transaction_importer_spring.repository.CategoryRepository;
@@ -94,14 +94,14 @@ public class BudgetService {
         return toBudgetDTO(budget, totalSpent);
     }
 
-    private LocalDateTime calculateStart(final BudgetPeriod budgetPeriod) {
+    private LocalDateTime calculateStart(final CalendarPeriod calendarPeriod) {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.clear(Calendar.MINUTE);
         cal.clear(Calendar.SECOND);
         cal.clear(Calendar.MILLISECOND);
 
-        return switch (budgetPeriod) {
+        return switch (calendarPeriod) {
             case MONTHLY -> {
                 cal.set(Calendar.DAY_OF_MONTH, 1);
                 yield LocalDateTime.ofInstant(cal.toInstant(), ZoneId.systemDefault());

@@ -1,6 +1,6 @@
 package com.brian.transaction_importer_spring.entity;
 
-import com.brian.transaction_importer_spring.enums.BudgetPeriod;
+import com.brian.transaction_importer_spring.enums.CalendarPeriod;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -26,7 +26,7 @@ public class Budget {
     private BigDecimal limitAmount;
 
     @Enumerated(EnumType.STRING)
-    private BudgetPeriod period;
+    private CalendarPeriod period;
 
     @ManyToOne
     private Category category;
