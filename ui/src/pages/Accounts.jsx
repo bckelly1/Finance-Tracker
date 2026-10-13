@@ -89,6 +89,7 @@ function Accounts() {
                             <th>Account Name</th>
                             <th>Institution</th>
                             <th>Type</th>
+                            <th>Alias</th>
                             <th>Last Updated</th>
                             <th className="text-right">Balance</th>
                         </tr>
@@ -100,6 +101,7 @@ function Accounts() {
                                 <td>{account.name}</td>
                                 <td>{account.institution}</td>
                                 <td>{account.type}</td>
+                                <td>{account.alias}</td>
                                 <td>{account.lastUpdated}</td>
                                 <td className={`text-right font-semibold ${account.balance >= 0 ? 'amount-positive' : 'amount-negative'}`}>
                                     {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(account.balance)}
