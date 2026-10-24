@@ -1,4 +1,4 @@
-FROM maven:3.9-eclipse-temurin-25
+FROM maven:3.10.0
 
 WORKDIR /usr/src/transactions
 
