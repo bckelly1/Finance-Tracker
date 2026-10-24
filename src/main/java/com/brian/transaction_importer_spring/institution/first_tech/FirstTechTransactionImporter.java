@@ -6,6 +6,7 @@ import com.brian.transaction_importer_spring.repository.AccountRepository;
 import com.brian.transaction_importer_spring.repository.CategoryRepository;
 import com.brian.transaction_importer_spring.repository.VendorRepository;
 import com.brian.transaction_importer_spring.service.CategoryInfererService;
+import com.brian.transaction_importer_spring.service.FileWriterService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.jsoup.Jsoup;
@@ -31,6 +32,10 @@ public class FirstTechTransactionImporter {
     private final VendorRepository vendorRepository;
 
     private final AccountRepository accountRepository;
+
+    private final FileWriterService fileWriterService;
+
+    public static final String LAST_TRANSACTION_PATH = "last_first_tech_transaction.html";
 
     // With Bank accounts, you have to determine if the money is going in (credit) or going out (debit)
     //    For First Tech, you can either determine that by looking for the parentheses () or the Credit/Debit label
@@ -136,6 +141,7 @@ public class FirstTechTransactionImporter {
     // Parse the email's HTML text and extract relevant transaction info from it.
     public Transaction[] parseHtml(final MailMessage mailMessage) {
         Document soup = Jsoup.parse(mailMessage.getHtml());
+        fileWriterService.writeToFile(LAST_TRANSACTION_PATH, soup.html());
         String title = soup.body().select("h1#title").text().strip();
         String accountName = soup.body().select("strong").getFirst().text().strip().split(" - ")[0];
         String accountNumber = soup.body().select("strong").getFirst().text().strip().split(" - ")[1].replace("*", "");
