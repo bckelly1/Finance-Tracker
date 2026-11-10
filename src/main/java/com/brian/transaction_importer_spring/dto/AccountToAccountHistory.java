@@ -14,4 +14,12 @@ public class AccountToAccountHistory {
 
         return accountHistory;
     }
+
+    public static AccountHistory parseDTO(final AccountDTO accountDTO) {
+        AccountHistory accountHistory = new AccountHistory();
+        accountHistory.setBalance(accountDTO.getBalance());
+        accountHistory.setTimestamp(accountDTO.getLastUpdated());
+
+        return accountHistory;
+    }
 }

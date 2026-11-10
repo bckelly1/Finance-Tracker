@@ -1,8 +1,11 @@
 package com.brian.transaction_importer_spring.controller.api;
 
 import com.brian.transaction_importer_spring.dto.AccountDTO;
+import com.brian.transaction_importer_spring.dto.AccountToAccountHistory;
 import com.brian.transaction_importer_spring.entity.Account;
+import com.brian.transaction_importer_spring.entity.AccountHistory;
 import com.brian.transaction_importer_spring.entity.Institution;
+import com.brian.transaction_importer_spring.repository.AccountHistoryRepository;
 import com.brian.transaction_importer_spring.repository.AccountRepository;
 import com.brian.transaction_importer_spring.repository.InstitutionRepository;
 import com.brian.transaction_importer_spring.service.ImportService;
@@ -18,6 +21,8 @@ import java.util.stream.Collectors;
 public class AccountApiController {
 
     private final AccountRepository accountRepository;
+
+    private final AccountHistoryRepository accountHistoryRepository;
 
     private final InstitutionRepository institutionRepository;
 
@@ -43,6 +48,13 @@ public class AccountApiController {
         Account account = accountRepository.findById(id).get();
         if (account == null) {
             return null;
+        }
+
+        double originalBalance = account.getBalance();
+        if (originalBalance != accountDTO.getBalance()) {
+            AccountHistory accountHistory = AccountToAccountHistory.parseDTO(accountDTO);
+            accountHistory.setAccount(account);
+            accountHistoryRepository.save(accountHistory);
         }
 
         account.setName(accountDTO.getName());
